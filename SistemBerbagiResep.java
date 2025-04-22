@@ -12,17 +12,21 @@ import service.PengelolaPenggunaImpl;
 
 public class SistemBerbagiResep {
     private static String penggunaSaatIni = null; // Untuk menyimpan nama pengguna yang login
+    private static PengelolaPengguna pengelolaPengguna;
+    private static PenyimpananResep penyimpananResep;
+    private static PencariResep pencariResep;
+    private static Scanner scanner;
     
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+        scanner = new Scanner(System.in);
         
-        // Inisialisasi komponen
-        PengelolaPengguna pengelolaPengguna = new PengelolaPenggunaImpl();
-        PenyimpananResep penyimpananResep = new PenyimpananResepImpl();
-        PencariResep pencariResep = new PencariResepImpl(penyimpananResep);
+        // Inisialisasi komponen dengan interface references
+        pengelolaPengguna = new PengelolaPenggunaImpl();
+        penyimpananResep = new PenyimpananResepImpl();
+        pencariResep = new PencariResepImpl(penyimpananResep);
         
         // Data contoh
-        inisialisasiDataContoh(pengelolaPengguna, penyimpananResep);
+        inisialisasiDataContoh();
         
         // Menu utama
         while (true) {
@@ -33,31 +37,31 @@ public class SistemBerbagiResep {
                 
                 switch (pilihan) {
                     case 1:
-                        daftarPengguna(scanner, pengelolaPengguna);
+                        daftarPengguna();
                         break;
                         
                     case 2:
-                        masuk(scanner, pengelolaPengguna);
+                        masuk();
                         break;
                         
                     case 3:
                         if (cekLogin()) {
-                            tambahResep(scanner, penyimpananResep);
+                            tambahResep();
                         } else {
                             System.out.println("Anda harus masuk terlebih dahulu!");
                         }
                         break;
                         
                     case 4:
-                        cariResep(scanner, pencariResep, penyimpananResep);
+                        cariResep();
                         break;
                         
                     case 5:
-                        lihatSemuaResep(penyimpananResep);
+                        lihatSemuaResep();
                         break;
                         
                     case 6:
-                        lihatDetailResep(scanner, penyimpananResep);
+                        lihatDetailResep();
                         break;
                         
                     case 7:
@@ -82,13 +86,13 @@ public class SistemBerbagiResep {
         }
     }
 
-    private static void inisialisasiDataContoh(PengelolaPengguna pengelola, PenyimpananResep penyimpanan) {
+    private static void inisialisasiDataContoh() {
         // Daftarkan pengguna contoh
-        pengelola.daftarkanPengguna("koki_andi", "sandi123", "andi@gmail.com");
-        pengelola.daftarkanPengguna("lia", "lia123", "lia@gmail.com");
-        pengelola.daftarkanPengguna("chef_budi", "budi456", "budi@example.id");
-        pengelola.daftarkanPengguna("diana_masak", "diana789", "diana@gmail.com");
-        pengelola.daftarkanPengguna("eko_kuliner", "eko101", "eko@example.id");
+        pengelolaPengguna.daftarkanPengguna("koki_andi", "sandi123", "andi@gmail.com");
+        pengelolaPengguna.daftarkanPengguna("lia", "lia123", "lia@gmail.com");
+        pengelolaPengguna.daftarkanPengguna("chef_budi", "budi456", "budi@example.id");
+        pengelolaPengguna.daftarkanPengguna("diana_masak", "diana789", "diana@gmail.com");
+        pengelolaPengguna.daftarkanPengguna("eko_kuliner", "eko101", "eko@example.id");
 
         // Resep 1: Nasi Goreng Ayam
         List<String> bahan1 = List.of("Ayam", "Nasi", "Sayuran", "Bawang merah", "Bawang putih", "Kecap manis");
@@ -174,13 +178,13 @@ public class SistemBerbagiResep {
         resep7.setRating(4.4);
 
         // Tambahkan semua resep ke penyimpanan
-        penyimpanan.tambahResep(resep1);
-        penyimpanan.tambahResep(resep2);
-        penyimpanan.tambahResep(resep3);
-        penyimpanan.tambahResep(resep4);
-        penyimpanan.tambahResep(resep5);
-        penyimpanan.tambahResep(resep6);
-        penyimpanan.tambahResep(resep7);
+        penyimpananResep.tambahResep(resep1);
+        penyimpananResep.tambahResep(resep2);
+        penyimpananResep.tambahResep(resep3);
+        penyimpananResep.tambahResep(resep4);
+        penyimpananResep.tambahResep(resep5);
+        penyimpananResep.tambahResep(resep6);
+        penyimpananResep.tambahResep(resep7);
     }
 
     private static void tampilkanMenuUtama() {
@@ -201,7 +205,7 @@ public class SistemBerbagiResep {
         System.out.print("Pilih menu: ");
     }
 
-    private static void daftarPengguna(Scanner scanner, PengelolaPengguna pengelola) {
+    private static void daftarPengguna() {
         System.out.print("Masukkan nama pengguna: ");
         String namaPengguna = scanner.nextLine();
         System.out.print("Masukkan kata sandi: ");
@@ -222,7 +226,7 @@ public class SistemBerbagiResep {
             }
         } while (!emailValid);
         
-        pengelola.daftarkanPengguna(namaPengguna, kataSandi, email);
+        pengelolaPengguna.daftarkanPengguna(namaPengguna, kataSandi, email);
     }
     
     private static boolean validasiEmail(String email) {
@@ -230,13 +234,13 @@ public class SistemBerbagiResep {
         return email.contains("@") && (email.endsWith("gmail.com") || email.endsWith(".id"));
     }
 
-    private static void masuk(Scanner scanner, PengelolaPengguna pengelola) {
+    private static void masuk() {
         System.out.print("Masukkan nama pengguna: ");
         String namaMasuk = scanner.nextLine();
         System.out.print("Masukkan kata sandi: ");
         String sandiMasuk = scanner.nextLine();
         
-        if (pengelola.verifikasiPengguna(namaMasuk, sandiMasuk)) {
+        if (pengelolaPengguna.verifikasiPengguna(namaMasuk, sandiMasuk)) {
             penggunaSaatIni = namaMasuk;
             System.out.println("Berhasil masuk! Selamat datang, " + penggunaSaatIni + "!");
         } else {
@@ -295,7 +299,7 @@ public class SistemBerbagiResep {
         return true;
     }
 
-    private static void tambahResep(Scanner scanner, PenyimpananResep penyimpanan) {
+    private static void tambahResep() {
         System.out.print("Masukkan judul resep: ");
         String judul = scanner.nextLine();
         
@@ -374,17 +378,17 @@ public class SistemBerbagiResep {
         
         // Validasi resep sebelum menambahkan
         if (validasiResep(judul, deskripsi, bahan, langkah, kategori, waktu)) {
-            Resep resepBaru = new Resep(penyimpanan.dapatkanSemuaResep().size() + 1, 
+            Resep resepBaru = new Resep(penyimpananResep.dapatkanSemuaResep().size() + 1, 
                                       judul, deskripsi, bahan, langkah, 
                                       kategori, waktu, diet, penggunaSaatIni);
-            penyimpanan.tambahResep(resepBaru);
+            penyimpananResep.tambahResep(resepBaru);
             System.out.println("Resep '" + judul + "' berhasil ditambahkan!");
         } else {
             System.out.println("Resep tidak dapat ditambahkan karena data tidak valid. Silakan coba lagi.");
         }
     }
 
-    private static void cariResep(Scanner scanner, PencariResep pencari, PenyimpananResep penyimpanan) {
+    private static void cariResep() {
         System.out.println("\nCari berdasarkan:");
         System.out.println("1. Bahan");
         System.out.println("2. Preferensi Diet");
@@ -400,7 +404,7 @@ public class SistemBerbagiResep {
                     // Menampilkan daftar bahan dari resep yang tersedia
                     System.out.println("\nBahan-bahan yang tersedia dalam resep:");
                     List<String> semuaBahan = new ArrayList<>();
-                    for (Resep r : penyimpanan.dapatkanSemuaResep()) {
+                    for (Resep r : penyimpananResep.dapatkanSemuaResep()) {
                         for (String bahan : r.getBahan()) {
                             if (!semuaBahan.contains(bahan)) {
                                 semuaBahan.add(bahan);
@@ -415,7 +419,7 @@ public class SistemBerbagiResep {
                     for (String cb : cariBahan) {
                         bahanCari.add(cb.trim());
                     }
-                    hasilCari = pencari.cariBerdasarkanBahan(bahanCari);
+                    hasilCari = pencariResep.cariBerdasarkanBahan(bahanCari);
                     break;
                     
                 case 2:
@@ -442,13 +446,13 @@ public class SistemBerbagiResep {
                             System.out.println("Pilihan tidak valid!");
                             return;
                     }
-                    hasilCari = pencari.cariBerdasarkanDiet(preferensi);
+                    hasilCari = pencariResep.cariBerdasarkanDiet(preferensi);
                     break;
                     
                 case 3:
                     System.out.println("\nWaktu persiapan resep yang tersedia (dalam menit):");
                     List<Integer> waktuList = new ArrayList<>();
-                    for (Resep r : penyimpanan.dapatkanSemuaResep()) {
+                    for (Resep r : penyimpananResep.dapatkanSemuaResep()) {
                         if (!waktuList.contains(r.getWaktuPersiapan())) {
                             waktuList.add(r.getWaktuPersiapan());
                             System.out.println("- " + r.getWaktuPersiapan() + " menit");
@@ -457,7 +461,7 @@ public class SistemBerbagiResep {
                     
                     System.out.print("\nMasukkan maksimal waktu persiapan (menit): ");
                     int maksWaktu = Integer.parseInt(scanner.nextLine());
-                    hasilCari = pencari.cariBerdasarkanWaktuPersiapan(maksWaktu);
+                    hasilCari = pencariResep.cariBerdasarkanWaktuPersiapan(maksWaktu);
                     break;
                     
                 default:
@@ -491,8 +495,8 @@ public class SistemBerbagiResep {
         }
     }
 
-    private static void lihatSemuaResep(PenyimpananResep penyimpanan) {
-        List<Resep> semuaResep = penyimpanan.dapatkanSemuaResep();
+    private static void lihatSemuaResep() {
+        List<Resep> semuaResep = penyimpananResep.dapatkanSemuaResep();
         System.out.println("\nSemua Resep:");
         for (int i = 0; i < semuaResep.size(); i++) {
             Resep r = semuaResep.get(i);
@@ -503,8 +507,8 @@ public class SistemBerbagiResep {
         }
     }
 
-    private static void lihatDetailResep(Scanner scanner, PenyimpananResep penyimpanan) {
-        List<Resep> semuaResep = penyimpanan.dapatkanSemuaResep();
+    private static void lihatDetailResep() {
+        List<Resep> semuaResep = penyimpananResep.dapatkanSemuaResep();
         
         if (semuaResep.isEmpty()) {
             System.out.println("\nBelum ada resep yang tersedia.");
@@ -526,7 +530,7 @@ public class SistemBerbagiResep {
                 Resep resepDipilih = semuaResep.get(pilihan-1);
                 tampilkanDetailResep(resepDipilih);
                 
-                // Fitur interaktif tambahan - Rating dan Bookmark
+                // Fitur interaktif tambahan - Rating
                 if (cekLogin()) {
                     System.out.print("\nApakah Anda ingin memberi rating untuk resep ini? (Y/N): ");
                     String jawaban = scanner.nextLine();
